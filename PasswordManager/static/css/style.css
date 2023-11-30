@@ -170,3 +170,23 @@ body.loggedin {
             align-items: center;
             justify-content: center;
 }
+ 
+.dashboard {
+            width: 50%;
+            margin: 0 auto; /* Center the dashboard */
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            background-color: #fff;
+        }
+        
+
+        @media (max-width: 768px) {
+            .dashboard {
+                width: 80%; /* Adjust for smaller screens */
+            }
+        }
