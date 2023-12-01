@@ -4,7 +4,6 @@ import hashlib
 import os
 import urllib.parse
 import requests
-from flask import jsonify
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -279,7 +278,7 @@ def get_valid_username():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    valid_usernames = get_valid_username()  # Get valid usernames from passwords.csv
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
