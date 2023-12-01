@@ -13,34 +13,26 @@
     <div class="container-fluid my-4 mx-2">
         {% block content %}
                 <div class="dashboard">
-            <h1>Welcome to the Password Manager Dashboard</h1>
-            <h2>User: {{ current_user }}</h2>
+                    {% if 'logged_in' in session and session['logged_in'] %}
+    <h1>Welcome to the Password Manager Dashboard, {{ session['Username'] }}</h1>
+    <h2>Your Credentials:</h2>
+    <ul>
+        {% for credential in credentials %}
+            <li>Website: {{ credential['website'] }} | Username: {{ credential['username'] }} | Password: {{ credential['password'] }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Please log in to view this page.</p>
+{% endif %}
+</div>
 
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Website</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for credential in credentials %}
-                        <tr>
-                            <td>{{ credential['website'] }}</td>
-                            <td>{{ credential['username'] }}</td>
-                            <td>{{ credential['password'] }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
 
             <a href="/logout" class="btn btn-primary">Logout</a>
         </div>
         <div class="index">
             <h1>Save New Login Info</h1>
 
-            <form action="/updatePassword.html" method="post" onsubmit="handleSubmit(event)">
+            <form action="/saveLogin" method="post">
                 <div class="mb-3">
                     <label for="website" class="form-label visually-hidden">
                         Website
