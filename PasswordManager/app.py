@@ -4,6 +4,7 @@ import hashlib
 import os
 import urllib.parse
 import requests
+from flask import jsonify
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -254,6 +255,19 @@ def save_login():
         username = request.form['username']
         password = request.form['password']
 
+        # Validate the password
+        validation_result = is_valid_password(password)
+        if not validation_result['valid']:
+            # Render the template with the error message
+            return render_template('dashboard.html', message=validation_result['reason'])
+
+            # Check if the password is compromised
+        hashed_password = hashlib.sha1(password.encode('utf-8')).hexdigest().upper()
+        compromised = check_password_compromised(hashed_password)
+        if compromised:
+            return {'valid': False, 'reason': "password is compromised and should not be used."}
+
+        # Encrypt the password before saving
         encrypted_password = encrypt_password(password)
 
         # Create a dictionary with the new login info
@@ -265,8 +279,8 @@ def save_login():
         # Redirect back to the dashboard after saving
         return redirect(url_for('show_dashboard'))
 
-
 valid_username = 'your_valid_username'  # Set your valid username here
+
 
 
 # Define a function to get valid usernames from passwords.csv
