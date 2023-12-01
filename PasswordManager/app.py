@@ -63,23 +63,25 @@ def save_to_csv(username, encrypted_password):
 
 
 def is_valid_password(password):
-    # Check if the password meets certain criteria
-    # For example, you can enforce a minimum length and complexity requirements
-
     min_length = 16
     if len(password) < min_length:
         return {'valid': False, 'reason': f"password must be at least {min_length} characters long."}
 
-    # You can add more complexity requirements as needed
-    # For example, at least one uppercase letter, one lowercase letter, and one digit
     if not any(c.isupper() for c in password):
         return {'valid': False, 'reason': "password must contain at least one uppercase letter."}
+
     if not any(c.islower() for c in password):
         return {'valid': False, 'reason': "password must contain at least one lowercase letter."}
+
     if not any(c.isdigit() for c in password):
         return {'valid': False, 'reason': "password must contain at least one digit."}
 
-    # If the password meets all criteria
+    # Check if the password is compromised
+    hashed_password = hashlib.sha1(password.encode('utf-8')).hexdigest().upper()
+    compromised = check_password_compromised(hashed_password)
+    if compromised:
+        return {'valid': False, 'reason': "password is compromised and should not be used."}
+
     return {'valid': True}
 
 
