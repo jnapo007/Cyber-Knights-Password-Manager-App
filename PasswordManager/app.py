@@ -18,7 +18,12 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/updatePassword.html', methods=['POST'])
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+
+@app.route('/update', methods=['POST'])
 def update_password():
     # Get user input from the form
     username = request.form['username']
@@ -27,7 +32,7 @@ def update_password():
     # Validate password
     validation_result = is_valid_password(password)
     if not validation_result['valid']:
-        return render_template('index.html', message=validation_result['reason'])
+        return render_template('register.html', message=validation_result['reason'])
 
     # Generate SHA-1 hash of the password
     hashed_password = generate_sha1_hash(password)
@@ -36,82 +41,43 @@ def update_password():
     compromised = check_password_compromised(hashed_password)
 
     if compromised:
-        return render_template('updatePassword.html', success=False)
+        return render_template('update.html', success=False)
     else:
         encrypted_password = encrypt_password(password)
         save_to_csv(username, encrypted_password)
-        return render_template('updatePassword.html', success=True)
+        return render_template('update.html', success=True)
 
 
 def save_to_csv(username, encrypted_password):
     # Check if the CSV file exists, if not, create it and write headers
-    file_exists = os.path.isfile('passwords.csv')
-    with open('passwords.csv', 'a', newline='') as csvfile:
-        headers = ['Username', 'Encrypted_Password']
+    file_exists = os.path.isfile('static/passwords.csv')
+    with open('static/passwords.csv', 'a', newline='') as csvfile:
+        headers = ['username', 'encrypted_password']
         writer = csv.DictWriter(csvfile, fieldnames=headers)
 
         if not file_exists:
             writer.writeheader()
 
         # Write username and encrypted password to the CSV file
-        writer.writerow({'Username': username, 'Encrypted_Password': encrypted_password})
-
-
-def create_update_password():
-    messages = []  # List to store messages indicating password issues
-
-    # Get user input for username
-    username = input("Enter your username: ")
-
-    # Get user input for password
-    while True:
-        password = input("Enter your new or existing password: ")
-
-        # Validate password
-        if is_valid_password(password):
-            break
-        else:
-            messages.append("Invalid password. Please ensure it meets the criteria.")
-
-    # Check if there are any messages indicating issues with the password
-    if messages:
-        # Display all the reasons for an invalid password
-        for message in messages:
-            print(message)
-        return  # Return without further processing if password is invalid
-
-    # Generate SHA-1 hash of the password
-    hashed_password = generate_sha1_hash(password)
-
-    # Check if the password is compromised
-    compromised = check_password_compromised(hashed_password)
-
-    if compromised:
-        print("Password compromised! Please choose a different password.")
-
-    else:
-        print("Password updated successfully!")
-        encrypt_password(password)
-    # Here, you might want to store the username and hashed_password securely,
-    # such as in a database or another secure storage mechanism.
+        writer.writerow({'username': username, 'encrypted_password': encrypted_password})
 
 
 def is_valid_password(password):
     # Check if the password meets certain criteria
     # For example, you can enforce a minimum length and complexity requirements
 
-    min_length = 8
+    min_length = 16
     if len(password) < min_length:
-        return {'valid': False, 'reason': f"Password must be at least {min_length} characters long."}
+        return {'valid': False, 'reason': f"password must be at least {min_length} characters long."}
 
     # You can add more complexity requirements as needed
     # For example, at least one uppercase letter, one lowercase letter, and one digit
     if not any(c.isupper() for c in password):
-        return {'valid': False, 'reason': "Password must contain at least one uppercase letter."}
+        return {'valid': False, 'reason': "password must contain at least one uppercase letter."}
     if not any(c.islower() for c in password):
-        return {'valid': False, 'reason': "Password must contain at least one lowercase letter."}
+        return {'valid': False, 'reason': "password must contain at least one lowercase letter."}
     if not any(c.isdigit() for c in password):
-        return {'valid': False, 'reason': "Password must contain at least one digit."}
+        return {'valid': False, 'reason': "password must contain at least one digit."}
 
     # If the password meets all criteria
     return {'valid': True}
@@ -124,13 +90,13 @@ def check_password_compromised(hashed_password):
     # URL-encode the prefix
     encoded_prefix = urllib.parse.quote(prefix)
 
-    # Send request to Pwned Passwords API
+    # Send request to Pwned passwords API
     api_url = f'https://api.pwnedpasswords.com/range/{encoded_prefix}'
     response = requests.get(api_url)
 
     if response.status_code == 200:
         # Print hashed password for debugging
-        # print(f'Hashed Password: {hashed_password}')
+        # print(f'Hashed password: {hashed_password}')
 
         # Print the API response for debugging
         # print(response.text)
@@ -207,11 +173,11 @@ def decrypt_password(encrypted_pw):
 
 # Function to retrieve the encrypted password for a given username from the CSV file
 def get_encrypted_password(username):
-    with open('passwords.csv', 'r', newline='') as csvfile:
+    with open('static/passwords.csv', 'r', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['Username'] == username:
-                return row['Encrypted_Password']
+            if row['username'] == username:
+                return row['Encrypted_password']
     return None  # Return None if username is not found in the CSV file
 
 
@@ -225,24 +191,25 @@ def decrypt_password_for_user(username):
     return None  # Return None if username is not found or password is not decrypted
 
 
-# Example usage
-create_update_password()
+def get_user_credentials(username):
+    user_credentials = []
+    with open('credentials.csv', mode='r', newline='') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['username'] == username:
+                user_credentials.append(
+                    {'website': row['website'], 'username': row['username'], 'password': row['password']})
+    return user_credentials
 
 
 @app.route('/dashboard')
 def show_dashboard():
     if 'logged_in' in session and session['logged_in']:
-        # Read credentials from the CSV file
-        passwords = []
-        with open('passwords.csv', 'r', newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                passwords.append(row)
-
-        # Render the dashboard template with the credentials
-        return render_template('dashboard.html', credentials=credentials)
+        username = session['username']  # Retrieve the username from the session
+        user_credentials = get_user_credentials(username)
+        return render_template('dashboard.html', credentials=user_credentials, username=username)
     else:
-        return redirect(url_for('login'))
+        return redirect(url_for('dashboard'))
 
 
 # Route to handle adding new credentials
@@ -252,7 +219,7 @@ def add_credentials():
     username = request.form['username']
     password = request.form['password']
 
-    with open('credentials.csv', 'a', newline='') as csvfile:
+    with open('static/credentials.csv', 'a', newline='') as csvfile:
         fieldnames = ['website', 'username', 'password']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -261,20 +228,68 @@ def add_credentials():
     return redirect(url_for('dashboard'))
 
 
-# Route for logging in
+def write_to_csv(data):
+    file_exists = os.path.isfile('static/credentials.csv')
+
+    with open('credentials.csv', mode='a', newline='') as file:
+        fieldnames = ['website', 'username', 'password']
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+        # Write header row if the file is newly created
+        if not file_exists:
+            writer.writeheader()
+
+        # Write data to the CSV file
+        writer.writerow({'website': data['website'], 'username': data['username'], 'password': data['password']})
+
+
+# Route to handle adding new credentials
+@app.route('/saveLogin', methods=['POST'])
+def save_login():
+    if request.method == 'POST':
+        website = request.form['website']
+        username = request.form['username']
+        password = request.form['password']
+
+        # Create a dictionary with the new login info
+        new_login = {'website': website, 'username': username, 'password': password}
+
+        # Write the new login info to the credentials CSV file
+        write_to_csv(new_login)
+
+        # Redirect back to the dashboard after saving
+        return redirect(url_for('show_dashboard'))
+
+
+valid_username = 'your_valid_username'  # Set your valid username here
+
+
+# Define a function to get valid usernames from passwords.csv
+def get_valid_username():
+    usernames = []
+    with open('static/passwords.csv', 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            usernames.append(row['username'])
+    return usernames
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    valid_usernames = get_valid_username()  # Get valid usernames from passwords.csv
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
-        # Perform authentication (this is a placeholder, replace with your authentication logic)
-        # For example, you might check credentials against a database or stored data
-        if username == 'your_username' and password == 'your_password':
+        # Get encrypted password for the provided username from the CSV
+        encrypted_password = get_encrypted_password(username)
+
+        if encrypted_password and encrypted_password == encrypt_password(password):
             session['logged_in'] = True
-            return redirect(url_for('dashboard'))
+            session['username'] = username  # Store the username in the session
+            return redirect(url_for('show_dashboard'))
         else:
-            return render_template('dashboard.html', message='Invalid credentials')
+            return render_template('index.html', message='Invalid credentials')
 
     return render_template('dashboard.html')
 
@@ -283,7 +298,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
-    return redirect(url_for('login'))
+    return redirect(url_for('show_dashboard'))
 
 
 if __name__ == '__main__':
