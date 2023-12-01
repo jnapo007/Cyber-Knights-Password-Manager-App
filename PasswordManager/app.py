@@ -216,22 +216,6 @@ def show_dashboard():
         return redirect(url_for('dashboard'))
 
 
-# Route to handle adding new credentials
-@app.route('/add', methods=['POST'])
-def add_credentials():
-    website = request.form['website']
-    username = request.form['username']
-    password = request.form['password']
-
-    with open('static/credentials.csv', 'a', newline='') as csvfile:
-        fieldnames = ['website', 'username', 'password']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writerow({'website': website, 'username': username, 'password': password})
-
-    return redirect(url_for('dashboard'))
-
-
 def write_to_csv(data):
     file_exists = os.path.isfile('static/credentials.csv')
 
@@ -279,8 +263,8 @@ def save_login():
         # Redirect back to the dashboard after saving
         return redirect(url_for('show_dashboard'))
 
-valid_username = 'your_valid_username'  # Set your valid username here
 
+valid_username = 'your_valid_username'  # Set your valid username here
 
 
 # Define a function to get valid usernames from passwords.csv
