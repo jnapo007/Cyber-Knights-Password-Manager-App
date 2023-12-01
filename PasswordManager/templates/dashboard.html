@@ -19,7 +19,7 @@
     <h2>Your Credentials:</h2>
     <ul>
         {% for credential in credentials %}
-            <li>Website: {{ credential['website'] }} | Username: {{ credential['username'] }} | Password: {{ credential['password'] }}</li>
+            <li>Website: <a href="{{ credential['website'] }}" target="_blank">{{ credential['website'] }}</a> | Username: {{ credential['username'] }} | Password: {{ credential['password'] }}</li>
         {% endfor %}
     </ul>
                     <a href="/logout" class="btn btn-primary">Logout</a>
@@ -41,7 +41,7 @@
                     </label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-globe"></i></span>
-                        <input type="text" class="form-control" id="website" name="website" placeholder="Website URL" required>
+                        <input type="text" class="form-control" id="website" name="website" placeholder="Website URL" value="https://" required>
                     </div>
                 </div>
 
