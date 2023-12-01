@@ -193,12 +193,13 @@ def decrypt_password_for_user(username):
 
 def get_user_credentials(username):
     user_credentials = []
-    with open('credentials.csv', mode='r', newline='') as file:
+    with open('static/credentials.csv', mode='r', newline='') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if row['username'] == username:
+                obscured_password = '*' * len(row['password'])
                 user_credentials.append(
-                    {'website': row['website'], 'username': row['username'], 'password': row['password']})
+                    {'website': row['website'], 'username': row['username'], 'password': obscured_password})
     return user_credentials
 
 
@@ -231,7 +232,7 @@ def add_credentials():
 def write_to_csv(data):
     file_exists = os.path.isfile('static/credentials.csv')
 
-    with open('credentials.csv', mode='a', newline='') as file:
+    with open('static/credentials.csv', mode='a', newline='') as file:
         fieldnames = ['website', 'username', 'password']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
 
@@ -251,8 +252,10 @@ def save_login():
         username = request.form['username']
         password = request.form['password']
 
+        encrypted_password = encrypt_password(password)
+
         # Create a dictionary with the new login info
-        new_login = {'website': website, 'username': username, 'password': password}
+        new_login = {'website': website, 'username': username, 'password': encrypted_password}
 
         # Write the new login info to the credentials CSV file
         write_to_csv(new_login)
@@ -298,7 +301,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
-    return redirect(url_for('show_dashboard'))
+    return render_template('index.html', message='You have been logged out.')
 
 
 if __name__ == '__main__':

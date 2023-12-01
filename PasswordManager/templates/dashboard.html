@@ -14,20 +14,22 @@
         {% block content %}
                 <div class="dashboard">
                     {% if 'logged_in' in session and session['logged_in'] %}
-    <h1>Welcome to the Password Manager Dashboard, {{ session['Username'] }}</h1>
+    <h1>Welcome to the Password Manager Dashboard, {{ session['username'] }}</h1>
+
     <h2>Your Credentials:</h2>
     <ul>
         {% for credential in credentials %}
             <li>Website: {{ credential['website'] }} | Username: {{ credential['username'] }} | Password: {{ credential['password'] }}</li>
         {% endfor %}
     </ul>
+                    <a href="/logout" class="btn btn-primary">Logout</a>
 {% else %}
     <p>Please log in to view this page.</p>
 {% endif %}
 </div>
 
 
-            <a href="/logout" class="btn btn-primary">Logout</a>
+
         </div>
         <div class="index">
             <h1>Save New Login Info</h1>

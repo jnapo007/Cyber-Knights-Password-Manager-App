@@ -10,7 +10,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Password Manager Web App</title>
-
 </head>
 
 <body>
@@ -39,23 +38,26 @@
                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary mt-3">Login</button>
-                    </div>
-                    <div class="text-center">
-                       <button type="button" onclick="window.location.href='/register'" class="btn btn-primary mt-3">Register</button>
-                    </div>
+                </div>
 
-                <div class="msg text-center">
-                    <div class="text-center">{% if message %}
+                           <div class="text-center">
+                <button type="submit" class="btn btn-primary mt-3">Login</button>
+                <span class="px-2"></span>
+                <button type="button" onclick="window.location.href='/register'" class="btn btn-primary mt-3">Register</button>
+
+
+             <div class="mt-4"></div>
+
+            <div class="msg text-center">
+                <div class="text-center">
+                    {% if message %}
                     <p>{{ message }}</p>
                     {% endif %}
-                        </div>
                 </div>
-            </form>
-
+            </div>
         </div>
         {% endblock content %}
     </div>
 </body>
+
 </html>
